@@ -1,0 +1,129 @@
+# Copie este arquivo para .env e preencha com suas credenciais reais.
+# NUNCA commite o arquivo .env no Git.
+
+# Endpoint S3-compatible do Supabase Storage
+# Encontrado em: Project Settings -> Storage -> S3 Connection
+SUPABASE_ENDPOINT_URL=https://SEU_PROJECT_REF.storage.supabase.co/storage/v1/s3
+
+# Região do projeto Supabase (também disponível em S3 Connection)
+SUPABASE_REGION=ca-central-1
+
+# Credenciais S3 do Supabase Storage (diferentes da anon key / service_role key)
+SUPABASE_ACCESS_KEY_ID=
+SUPABASE_SECRET_ACCESS_KEY=
+
+# Nome do bucket de origem dos dados
+SUPABASE_BUCKET=Storage DataLake Ecommerce
+
+.env
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+*.parquet
+credentials.json
+.vscode/
+.idea/
+venv/
+.venv/
+
+# Supabase → Databricks ETL
+
+Pipeline de extração de dados armazenados como parquet no **Supabase Storage**
+e carga em tabelas **Delta Lake** no **Databricks**, via protocolo S3.
+
+## Arquitetura
+
+```
+Supabase Storage (S3-compatible) → boto3 + pandas → Spark DataFrame → Delta Table (Databricks)
+```
+
+Veja detalhes em [`docs/architecture.md`](docs/architecture.md).
+
+## Requisitos
+
+- Python 3.9+
+- Conta Supabase com Storage habilitado e S3 protocol connection ativo
+- Workspace Databricks com acesso de rede ao domínio do Supabase
+  (cluster clássico ou network policy liberada — não funciona no compute
+  serverless da Free Edition, veja [`docs/architecture.md`](docs/architecture.md))
+
+## Setup
+
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/SEU_USUARIO/supabase-databricks-etl.git
+   cd supabase-databricks-etl
+   ```
+
+2. Instale as dependências:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Copie o arquivo de exemplo de variáveis de ambiente e preencha com suas
+   credenciais reais:
+   ```bash
+   cp .env.example .env
+   ```
+
+   As credenciais S3 do Supabase (`access_key_id` / `secret_access_key`) são
+   encontradas em **Project Settings → Storage → S3 Connection** no painel
+   do Supabase.
+
+   > ⚠️ Nunca commite o arquivo `.env`. Ele já está listado no `.gitignore`.
+
+## Uso
+
+### Localmente / Jupyter
+
+```python
+from src.extract import extract_parquet
+
+df = extract_parquet("clientes.parquet")
+df.head()
+```
+
+### No Databricks
+
+1. Importe este repositório via **Repos** no workspace do Databricks
+   (Workspace → Repos → Add Repo).
+2. Abra `notebooks/etl_pipeline.py`, ajuste o `sys.path.append(...)` para o
+   caminho do repositório no seu workspace e o dicionário `TABELAS` com os
+   arquivos e tabelas de destino desejados.
+3. Configure as variáveis de ambiente como **Databricks Secrets** e injete-as
+   no cluster, ou defina-as diretamente na sessão do notebook.
+4. Execute o notebook (manualmente ou agendado via Jobs).
+
+## Estrutura do projeto
+
+```
+supabase-databricks-etl/
+├── README.md
+├── .gitignore
+├── .env.example
+├── requirements.txt
+├── src/
+│   ├── config.py       # Configuração via variáveis de ambiente
+│   ├── extract.py       # Extração de dados do Supabase Storage
+│   └── load.py          # Carga em tabelas Delta
+├── notebooks/
+│   └── etl_pipeline.py  # Pipeline executável no Databricks
+└── docs/
+    └── architecture.md  # Documentação da arquitetura
+```
+
+## Segurança
+
+- Credenciais são carregadas exclusivamente via variáveis de ambiente.
+- Recomenda-se rotacionar as chaves S3 do Supabase periodicamente em
+  **Project Settings → Storage → S3 Connection**.
+
+## Licença
+
+MIT
+
+boto3>=1.34.0
+pandas>=2.0.0
+pyarrow>=14.0.0
+python-dotenv>=1.0.0
