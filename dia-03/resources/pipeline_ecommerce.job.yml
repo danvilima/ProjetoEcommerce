@@ -1,0 +1,24 @@
+resources:
+  jobs:
+    pipeline_ecommerce:
+      name: Pipeline E-commerce
+      parameters:
+        - name: catalogo
+          default: ${var.catalog}
+      tasks:
+        - task_key: atualizar_pipeline
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.projeto_ecommerce_etl.id}
+        - task_key: testes_qualidade
+          depends_on:
+            - task_key: atualizar_pipeline
+          environment_key: serverless_python
+          notebook_task:
+            notebook_path: ../src/projeto_ecommerce_etl/testes/testes_qualidade.py
+            source: WORKSPACE
+            base_parameters:
+              catalogo: "{{job.parameters.catalogo}}"
+      environments:
+        - environment_key: serverless_python
+          spec:
+            client: "4"

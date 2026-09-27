@@ -1,0 +1,14 @@
+﻿# Pipeline batch do e-commerce: a bronze e sobrescrita por outra ingestao.
+resources:
+  pipelines:
+    projeto_ecommerce_etl:
+      name: projeto_ecommerce_etl
+      catalog: ${var.catalog}
+      schema: ${var.schema}
+      serverless: true
+      photon: true
+      root_path: ../src/projeto_ecommerce_etl
+      libraries:
+        - glob:
+            include: ../src/projeto_ecommerce_etl/transformations/**
+
