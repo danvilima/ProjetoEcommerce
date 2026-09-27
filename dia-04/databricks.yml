@@ -1,0 +1,31 @@
+bundle:
+  name: ecommerce_dashboards
+  engine: direct
+  uuid: 8f93a8ab-4a0f-49f9-bfd7-062cc248bc4e
+include:
+  - resources/*.yml
+variables:
+  catalog:
+    default: projetoecommerce
+  schema:
+    default: gold
+  warehouse_id:
+    lookup:
+      warehouse: "Serverless Starter Warehouse"
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://dbc-756aca88-459e.cloud.databricks.com
+    variables:
+      catalog: projetoecommerce
+      schema: gold
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-756aca88-459e.cloud.databricks.com
+      root_path: /Workspace/Users/daniel.vlima021@gmail.com/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: projetoecommerce
+      schema: gold

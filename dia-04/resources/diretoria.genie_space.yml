@@ -1,0 +1,11 @@
+resources:
+  genie_spaces:
+    diretoria_ecommerce:
+      title: "Diretoria E-commerce"
+      description: "Assistente analítico em português para Comercial, Customer Success e Pricing; dados de 13/12/2025 a 11/01/2026."
+      warehouse_id: ${var.warehouse_id}
+      parent_path: ${workspace.root_path}
+      file_path: ../src/genie/diretoria_ecommerce.geniespace.json
+      permissions:
+        - level: CAN_RUN
+          group_name: diretoria-ecommerce
